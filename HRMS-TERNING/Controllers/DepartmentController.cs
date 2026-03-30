@@ -19,7 +19,7 @@ namespace HRMS_TERNING.Controllers
         Name = "IT",
         FloorNumber = "IT-001",
         Description = "Information Technology",
-        
+
         },
     new Department {
         Id = 2,
@@ -61,7 +61,7 @@ namespace HRMS_TERNING.Controllers
             return Ok(result);
         }
 
-        [HttpGet("GetById")]
+        [HttpGet("GetBy/{id}")]
         public IActionResult GetById(long id)
         {
             var department = departments
@@ -83,7 +83,46 @@ namespace HRMS_TERNING.Controllers
             return Ok(department);
         }
 
+        [HttpPost("ADD")]
+        public IActionResult ADD([FromBody] SaveDepartmentDto saveDto)
+        {
+            var department = new Department
+            {
+                Id = (departments.LastOrDefault()?.Id ?? 0) + 1,
+                Name = saveDto.Name,
+                Description = saveDto.Description,
+                FloorNumber = saveDto.FloorNumber,
+            };
 
+            departments.Add(department);
+            return Ok(department);
+        }
+
+        [HttpPut("Update")]
+        public IActionResult Update([FromBody] SaveDepartmentDto saveDto)
+        {
+            var department = departments.FirstOrDefault(x => x.Id == saveDto.Id);
+            if (department == null)
+                return NotFound("Department Does Not Exist");
+
+            department.Name = saveDto.Name;
+            department.Description = saveDto.Description;
+            department.FloorNumber = saveDto.FloorNumber;
+
+            return Ok(department);
+        }
+
+
+        [HttpDelete("Delete/{id}")]
+        public IActionResult Delete(long id)
+        {
+            var department = departments.FirstOrDefault(x => x.Id == id);
+            if (department == null)
+                return NotFound("Department Does Not Exist");
+
+            departments.Remove(department);
+            return Ok();
+        }
     }
 }
 
