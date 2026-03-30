@@ -10,7 +10,7 @@
         public string? Email { get; set; }
 
         public string? Position { get; set; }
+        public DateTime BirthDate { get; set; }
 
-        public DateTime? BirthDate { get; set; }  //optional / Nullable
     }
 }

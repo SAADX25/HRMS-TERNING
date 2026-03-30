@@ -2,17 +2,14 @@
 {
     public class Department
     {
-        public int Id { get; set; }
-        public string Name { get; set; }
-        public string Description { get; set; }
+        
+        public long Id { get; set; }
 
-        public string FlorNumber { get; set; }
+        public string Name { get; set; }
 
         
-        public List<string> Employee { get; set; } = new List<string>();
+        public string Description { get; set; } 
 
-
-
-
+        public string? FloorNumber { get; set; }
     }
 }
