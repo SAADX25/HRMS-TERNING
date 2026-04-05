@@ -1,4 +1,5 @@
-﻿using HRMS_TERNING.Dtos.Employees;
+﻿using HRMS.DbContexts;
+using HRMS_TERNING.Dtos.Employees;
 using HRMS_TERNING.Models;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Http.HttpResults;
@@ -18,29 +19,43 @@ namespace HRMS_TERNING.Controllers
             new Employee(){ID = 1,FirstName="Nadia",LastName = "SEED" ,Email ="Nadia@314", BirthDate=new DateTime(2003,1,20)},
         };
 
-
-        [HttpGet("GetEmployees")]//api/Employees/GetEmployee
-
-        public ActionResult<Employee> GetEmployees(string? position)
+        private readonly HRMSContext _dbContext;
+            public EmployeesController(HRMSContext dbContext)
         {
-            var result = from employee in employees
-                         where (position == null || employee.Position == position)
+              _dbContext = dbContext;
+        }
+
+        
+        // CRUD Operations
+        // C
+        // R
+        // U
+        // D
+
+        [HttpGet("GetByCriteria")] // Data Annotation : Method -> Api Endpoint
+        public IActionResult GetByCriteria([FromQuery] SearchEmployeeDto employeeDto) // (?) --> Optional / Nullable
+        {
+            var result = from employee in _dbContext.Employees
+                         from department in _dbContext.Departments.Where(x => x.Id == employee.DepartmentId).DefaultIfEmpty() // Left Join
+                         from manger in _dbContext.Employees.Where(x=> x.ID == employee.ManagerId)
+                         where (employeeDto.Position == null || employee.Position.ToUpper().Contains(employeeDto.Position.ToUpper())) &&
+                               (employeeDto.Name == null || employee.FirstName.ToUpper().Contains(employeeDto.Name.ToUpper()))
                          orderby employee.ID descending
-                         select new EemployeesDto
+                         select new EmployeeDto
                          {
                              ID = employee.ID,
+                             Name = employee.FirstName + " " + employee.LastName,
                              FirstName = employee.FirstName,
                              LastName = employee.LastName,
+                             Position = employee.Position,
                              BirthDate = employee.BirthDate,
                              Email = employee.Email,
-                             Position = employee.Position
-
-
+                             DepartmentId = employee.DepartmentId,
+                             DepartmentName = department.Name,
+                             ManagerId = employee.ManagerId,
                          };
 
             return Ok(result);
-
-            //return Ok(new { Name =  });
         }
         [HttpGet("GetById")]
         public IActionResult GetById(long id)
@@ -49,6 +64,8 @@ namespace HRMS_TERNING.Controllers
             {
                 ID = x.ID,
                 Name = x.FirstName + " " + x.LastName,
+                FirstName = x.FirstName,
+                LastName = x.LastName,
                 Position = x.Position,
                 Email = x.Email
             }).FirstOrDefault(x => x.ID == id);
